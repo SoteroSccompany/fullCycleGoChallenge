@@ -1,0 +1,21 @@
+FROM golang:latest as builder
+
+WORKDIR /usr/src/app
+
+COPY . .
+
+RUN go mod init main && \
+    go mod tidy && \
+    go build -o src/main src/main.go
+
+RUN chmod +x src
+
+CMD ["./src/main"]
+
+FROM scratch
+WORKDIR /usr/src/app
+COPY --from=builder /usr/src/app/src/main .
+CMD ["./main"]
+
+
+# pre-copy/cache go.mod for pre-downloading dependencies and only redownloading them in subsequent builds if they change
